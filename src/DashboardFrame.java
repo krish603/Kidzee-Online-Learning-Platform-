@@ -28,6 +28,10 @@ class DashboardPanel extends JPanel {
         // Edit profile button with image
         JButton editProfileButton = new JButton(new ImageIcon("img/buttons/user_profile.png")); // Replace with the actual path
         editProfileButton.setBounds(70, 300, 100, 50); // Adjust as needed
+        editProfileButton.addActionListener(e -> {
+            EditProfileFrame editProfileFrame = new EditProfileFrame();
+            editProfileFrame.setVisible(true);
+        });
         add(editProfileButton);
 
         // User logout button with image
