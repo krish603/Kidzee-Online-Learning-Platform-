@@ -50,6 +50,22 @@ class DashboardPanel extends JPanel {
         JLabel courseLabel = createRoundedLabel("img/courses.png", "img/courses_hover.png", 760, 100);
         add(courseLabel);  
 
+        JLabel timetable = new JLabel(new ImageIcon("img/timetable.png"));
+        timetable.setBounds(370, 375, 75, 75); // Example positioning, adjust as needed
+        add(timetable);
+
+        JLabel notiflication = new JLabel(new ImageIcon("img/notiflication.png"));
+        notiflication.setBounds(520, 375, 75, 75); // Example positioning, adjust as needed
+        add(notiflication);
+        
+        JLabel userManage = new JLabel(new ImageIcon("img/user_manage.png"));
+        userManage.setBounds(670, 375, 75, 75); // Example positioning, adjust as needed
+        add(userManage);
+        
+        JLabel course = new JLabel(new ImageIcon("img/course.png"));
+        course.setBounds(820, 375, 75, 75); // Example positioning, adjust as needed
+        add(course);
+
         JLabel greyBox = new JLabel(new ImageIcon("img/grey_box.png"));
         greyBox.setBounds(320, 250, 650, 300); // Example positioning, adjust as needed
         add(greyBox);
