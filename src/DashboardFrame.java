@@ -41,6 +41,10 @@ class DashboardPanel extends JPanel {
         adminPanelLabel.setBounds(70, 560, 200, 30);
         add(adminPanelLabel);
 
+        JButton notificationBellButton = new JButton(new ImageIcon("img/notification_bell.png"));
+        notificationBellButton.setBounds(910, 20, 50, 50); 
+        add(notificationBellButton);
+
         JLabel studentLabel = createRoundedLabel("img/students.png", "img/students_hover.png", 320, 100);
         add(studentLabel);
 
