@@ -51,20 +51,36 @@ class DashboardPanel extends JPanel {
         add(courseLabel);  
 
         JLabel timetable = new JLabel(new ImageIcon("img/timetable.png"));
-        timetable.setBounds(370, 375, 75, 75); // Example positioning, adjust as needed
+        timetable.setBounds(350, 300, 150, 150); // Example positioning, adjust as needed
         add(timetable);
 
-        JLabel notiflication = new JLabel(new ImageIcon("img/notiflication.png"));
-        notiflication.setBounds(520, 375, 75, 75); // Example positioning, adjust as needed
-        add(notiflication);
+        JButton timetableButton = new JButton(new ImageIcon("img/buttons/timetableButton.png")); // Replace with the actual path
+        timetableButton.setBounds(380, 475, 100, 50); // Adjust as needed
+        add(timetableButton);
+
+        JLabel notification = new JLabel(new ImageIcon("img/notification.png"));
+        notification.setBounds(500, 300, 150, 150); // Example positioning, adjust as needed
+        add(notification);
+
+        JButton notificationButton = new JButton(new ImageIcon("img/buttons/notificationButton.png")); // Replace with the actual path
+        notificationButton.setBounds(530, 475, 100, 50); // Adjust as needed
+        add(notificationButton);
         
         JLabel userManage = new JLabel(new ImageIcon("img/user_manage.png"));
-        userManage.setBounds(670, 375, 75, 75); // Example positioning, adjust as needed
+        userManage.setBounds(650, 300, 150, 150); // Example positioning, adjust as needed
         add(userManage);
+
+        JButton userManageButton = new JButton(new ImageIcon("img/buttons/userManageButton.png")); // Replace with the actual path
+        userManageButton.setBounds(680, 475, 100, 50); // Adjust as needed
+        add(userManageButton);
         
         JLabel course = new JLabel(new ImageIcon("img/course.png"));
-        course.setBounds(820, 375, 75, 75); // Example positioning, adjust as needed
+        course.setBounds(800, 300, 150, 150); // Example positioning, adjust as needed
         add(course);
+
+        JButton courseButton = new JButton(new ImageIcon("img/buttons/courseButton.png")); // Replace with the actual path
+        courseButton.setBounds(830, 475, 100, 50); // Adjust as needed
+        add(courseButton);
 
         JLabel greyBox = new JLabel(new ImageIcon("img/grey_box.png"));
         greyBox.setBounds(320, 250, 650, 300); // Example positioning, adjust as needed
