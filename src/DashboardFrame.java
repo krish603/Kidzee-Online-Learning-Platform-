@@ -4,8 +4,12 @@ import java.awt.event.*;
 
 class DashboardPanel extends JPanel {
     private Image backgroundImage;
+    private MainFrame mainFrame;
+    private First_Interface firstInterface;
 
-    public DashboardPanel() {
+    public DashboardPanel(MainFrame mainFrame) {
+        this.mainFrame = mainFrame;
+
         // Load the background image
         ImageIcon icon = new ImageIcon("img/dashboard_bg.png"); // Update with the actual path to your image
         backgroundImage = icon.getImage();
@@ -28,10 +32,7 @@ class DashboardPanel extends JPanel {
         // Edit profile button with image
         JButton editProfileButton = new JButton(new ImageIcon("img/buttons/user_profile.png")); // Replace with the actual path
         editProfileButton.setBounds(70, 300, 100, 50); // Adjust as needed
-        editProfileButton.addActionListener(e -> {
-            EditProfileFrame editProfileFrame = new EditProfileFrame();
-            editProfileFrame.setVisible(true);
-        });
+        editProfileButton.addActionListener(e -> showEditProfilePanel());
         add(editProfileButton);
 
         // User logout button with image
@@ -116,6 +117,17 @@ class DashboardPanel extends JPanel {
 
         return label;
     }
+
+   private void showEditProfilePanel() {
+        if (mainFrame != null) { // Check if mainFrame is not null
+            EditProfilePanel editProfilePanel = new EditProfilePanel();
+            mainFrame.setContentPane(editProfilePanel);
+            mainFrame.revalidate();
+            mainFrame.repaint();
+        } else {
+            System.err.println("Error: MainFrame reference is null.");
+        }
+    }    
 
     @Override
     protected void paintComponent(Graphics g) {

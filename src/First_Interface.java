@@ -9,6 +9,7 @@ import java.sql.SQLException;
 public class First_Interface extends JFrame {
     private JProgressBar progressBar;
     private Timer timer;
+    private MainFrame mainFrame;
 
     public First_Interface() {
         // Load the image
@@ -49,7 +50,7 @@ public class First_Interface extends JFrame {
         setLocationRelativeTo(null); // Center the frame
 
         // Initialize and start the loading timer
-        timer = new Timer(50, e -> updateProgress());
+        timer = new Timer(10, e -> updateProgress());
         timer.start();
     }
 
@@ -99,15 +100,18 @@ public class First_Interface extends JFrame {
         passwordField.setBounds(400, 300, 300, 30); // Example positioning, adjust as needed
         loginPanel.add(passwordField);
 
-        JButton loginButton = new JButton(new ImageIcon("img/buttons/login.png")); // Replace with the actual path
-        loginButton.setBounds(500, 350, 100, 50); // Adjust as needed
+        JButton loginButton = new JButton(new ImageIcon("img/buttons/login.png"));
+        loginButton.setBounds(500, 350, 100, 50);
         loginButton.addActionListener(e -> {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
             boolean authenticated = UserAuthenticator.authenticate(username, password);
             if (authenticated) {
-                setContentPane(new DashboardPanel()); // Replace the content pane with the dashboard panel
+                // Pass this instance (the frame) to the DashboardPanel
+                DashboardPanel dashboardPanel = new DashboardPanel(mainFrame);
+                setContentPane(dashboardPanel);
                 revalidate();
+                repaint();  
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
             }
