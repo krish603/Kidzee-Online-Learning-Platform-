@@ -37,7 +37,7 @@ public class TimetableManagementFrame extends JFrame {
         titleLabel.setBounds(350, 20, 350, 30);
         headerPanel.add(titleLabel);
 
-        JLabel facultyLabel = new JLabel("© Kidzee E-Learning Platform");
+        JLabel facultyLabel = new JLabel("© Faculty of Technology");
         facultyLabel.setFont(new Font("Arial", Font.ITALIC, 14));
         facultyLabel.setForeground(Color.WHITE);
         facultyLabel.setBounds(420, 50, 200, 20);
