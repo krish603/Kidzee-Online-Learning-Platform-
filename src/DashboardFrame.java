@@ -5,7 +5,7 @@ import java.awt.event.*;
 class DashboardPanel extends JPanel {
     private Image backgroundImage;
     private MainFrame mainFrame;
-    private First_Interface firstInterface;
+    // private First_Interface firstInterface;
 
     public DashboardPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
