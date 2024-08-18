@@ -12,6 +12,7 @@ public class TimetableManagementFrame extends JFrame {
     private JTextField titleField;
     private JComboBox<String> departmentComboBox;
     private JTextField pdfFilePathField;
+    private MainFrame mainFrame;
     private JTextField searchField;
     private DefaultTableModel tableModel;
     private JTable timetableTable;
@@ -30,6 +31,11 @@ public class TimetableManagementFrame extends JFrame {
         headerPanel.setBounds(0, 0, 1025, 80);
         headerPanel.setLayout(null);
         add(headerPanel);
+
+        JButton goBackButton = new JButton(new ImageIcon("img/buttons/arrow.png")); // Replace with the actual path
+        goBackButton.setBounds(30, 20, 50, 50); // Adjust as needed
+        goBackButton.addActionListener(e -> showDashboardFrame());
+        add(goBackButton);
 
         JLabel titleLabel = new JLabel("TIMETABLE MANAGEMENT PORTAL");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
@@ -194,6 +200,18 @@ public class TimetableManagementFrame extends JFrame {
         titleField.setText("");
         departmentComboBox.setSelectedIndex(0);
         pdfFilePathField.setText("");
+    }
+
+    private void showDashboardFrame() {
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+
+        if (parentFrame != null) {
+            parentFrame.dispose(); // Close the parent JFrame
+        }
+
+        // Create and show the new frame
+        DashboardPanel dFrame = new DashboardPanel(mainFrame);
+        dFrame.setVisible(true);
     }
 
     private void searchTimetable(String query) {

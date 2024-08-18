@@ -3,6 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class UserManagementPortal extends JFrame {
+    private MainFrame mainFrame;
     
     public UserManagementPortal() {
         // Frame settings
@@ -17,6 +18,11 @@ public class UserManagementPortal extends JFrame {
         headerPanel.setBounds(0, 0, 1025, 80);
         headerPanel.setLayout(null);
         add(headerPanel);
+
+        JButton goBackButton = new JButton(new ImageIcon("img/buttons/arrow.png")); // Replace with the actual path
+        goBackButton.setBounds(30, 20, 50, 50); // Adjust as needed
+        goBackButton.addActionListener(e -> showDashboardFrame());
+        add(goBackButton);
 
         JLabel titleLabel = new JLabel("USER MANAGEMENT PORTAL");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
@@ -201,6 +207,18 @@ public class UserManagementPortal extends JFrame {
             dobField.setText("");
             addressField.setText("");
         });
+    }
+
+    private void showDashboardFrame() {
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+
+        if (parentFrame != null) {
+            parentFrame.dispose(); // Close the parent JFrame
+        }
+
+        // Create and show the new frame
+        DashboardPanel dFrame = new DashboardPanel(mainFrame);
+        dFrame.setVisible(true);
     }
 
     public static void main(String[] args) {

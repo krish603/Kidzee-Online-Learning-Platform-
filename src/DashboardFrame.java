@@ -65,6 +65,7 @@ class DashboardPanel extends JPanel {
 
         JButton timetableButton = new JButton(new ImageIcon("img/buttons/timetableButton.png")); // Replace with the actual path
         timetableButton.setBounds(380, 475, 100, 50); // Adjust as needed
+        timetableButton.addActionListener(e -> openTimetableManagementFrame());
         add(timetableButton);
 
         JLabel notification = new JLabel(new ImageIcon("img/notification.png"));
@@ -73,6 +74,7 @@ class DashboardPanel extends JPanel {
 
         JButton notificationButton = new JButton(new ImageIcon("img/buttons/notificationButton.png")); // Replace with the actual path
         notificationButton.setBounds(530, 475, 100, 50); // Adjust as needed
+        notificationButton.addActionListener(e -> openNoticeManagementFrame());
         add(notificationButton);
         
         JLabel userManage = new JLabel(new ImageIcon("img/user_manage.png"));
@@ -81,6 +83,7 @@ class DashboardPanel extends JPanel {
 
         JButton userManageButton = new JButton(new ImageIcon("img/buttons/userManageButton.png")); // Replace with the actual path
         userManageButton.setBounds(680, 475, 100, 50); // Adjust as needed
+        userManageButton.addActionListener(e -> openUserManagementPortal());
         add(userManageButton);
         
         JLabel course = new JLabel(new ImageIcon("img/course.png"));
@@ -89,11 +92,56 @@ class DashboardPanel extends JPanel {
 
         JButton courseButton = new JButton(new ImageIcon("img/buttons/courseButton.png")); // Replace with the actual path
         courseButton.setBounds(830, 475, 100, 50); // Adjust as needed
+        courseButton.addActionListener(e -> openCourseManagementFrame());
         add(courseButton);
 
         JLabel greyBox = new JLabel(new ImageIcon("img/grey_box.png"));
         greyBox.setBounds(320, 250, 650, 300); // Example positioning, adjust as needed
         add(greyBox);
+    }
+
+    private void openTimetableManagementFrame() {
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+
+        if (parentFrame != null) {
+            parentFrame.dispose(); // Close the parent JFrame
+        }
+
+        TimetableManagementFrame tframe = new TimetableManagementFrame();
+        tframe.setVisible(true);
+    }
+
+    private void openNoticeManagementFrame() {
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+
+        if (parentFrame != null) {
+            parentFrame.dispose(); // Close the parent JFrame
+        }
+
+        NoticeManagementFrame nFrame = new NoticeManagementFrame();
+        nFrame.setVisible(true);
+    }
+
+    private void openUserManagementPortal() {
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+
+        if (parentFrame != null) {
+            parentFrame.dispose(); // Close the parent JFrame
+        }
+
+        UserManagementPortal uFrame = new UserManagementPortal();
+        uFrame.setVisible(true);
+    }
+
+    private void openCourseManagementFrame() {
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+
+        if (parentFrame != null) {
+            parentFrame.dispose(); // Close the parent JFrame
+        }
+
+        CourseManagementPortal cFrame = new CourseManagementPortal();
+        cFrame.setVisible(true);
     }
 
     private JLabel createRoundedLabel(String imagePath, String hoverImagePath, int x, int y) {

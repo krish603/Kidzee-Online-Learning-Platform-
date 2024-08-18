@@ -3,7 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class CourseManagementPortal extends JFrame {
-
+    private MainFrame mainFrame;
     private JTextField courseIdField, nameField, creditField, depIdField, lecIdField, searchField;
     private JComboBox<String> isGpaComboBox, semesterComboBox;
     private JTable courseTable;
@@ -13,7 +13,7 @@ public class CourseManagementPortal extends JFrame {
         // Frame settings
         setTitle("Course Management Portal");
         setSize(1025, 640);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setLayout(null);
 
         // Top Panel
@@ -22,6 +22,11 @@ public class CourseManagementPortal extends JFrame {
         headerPanel.setBounds(0, 0, 1025, 80);
         headerPanel.setLayout(null);
         add(headerPanel);
+
+        JButton goBackButton = new JButton(new ImageIcon("img/buttons/arrow.png")); // Replace with the actual path
+        goBackButton.setBounds(30, 20, 50, 50); // Adjust as needed
+        goBackButton.addActionListener(e -> showDashboardFrame());
+        add(goBackButton);
 
         JLabel titleLabel = new JLabel("COURSE MANAGEMENT PORTAL");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
@@ -195,6 +200,16 @@ public class CourseManagementPortal extends JFrame {
                 }
             }
         });
+    }
+
+    private void showDashboardFrame() {
+        dispose();
+
+        // Create and show the new frame
+        DashboardPanel dFrame = new DashboardPanel(mainFrame);
+        setContentPane(dFrame);
+        revalidate();
+        repaint();
     }
 
     public static void main(String[] args) {
