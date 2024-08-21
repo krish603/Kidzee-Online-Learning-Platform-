@@ -1,6 +1,8 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class CourseManagementPortal extends JFrame {
     private MainFrame mainFrame;
@@ -25,7 +27,12 @@ public class CourseManagementPortal extends JFrame {
 
         JButton goBackButton = new JButton(new ImageIcon("img/buttons/arrow.png")); // Replace with the actual path
         goBackButton.setBounds(30, 20, 50, 50); // Adjust as needed
-        goBackButton.addActionListener(e -> showDashboardFrame());
+        goBackButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showDashboardFrame();
+            }
+        });
         add(goBackButton);
 
         JLabel titleLabel = new JLabel("COURSE MANAGEMENT PORTAL");
