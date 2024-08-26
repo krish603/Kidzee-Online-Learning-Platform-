@@ -1,38 +1,47 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 
-public class EditProfilePanel extends JPanel {
+public class EditProfilePanel extends JFrame {
+    private MainFrame mainFrame;
     
     public EditProfilePanel() {
-        setLayout(null);
-        setBackground(Color.WHITE);
+        setTitle("Kidzee E-Learning Platform");
+        setSize(1025, 640);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getContentPane().setLayout(null);
 
-        ImageIcon icon = new ImageIcon("img/editProfileBG.png");
-        Image editProfileBG = icon.getImage();
+       // Top Panel
+       JPanel headerPanel = new JPanel();
+       headerPanel.setBackground(new Color(100, 149, 237));
+       headerPanel.setBounds(0, 0, 1025, 80);
+       headerPanel.setLayout(null);
+       add(headerPanel);
 
-        // Panel setup
-        JPanel editProfilePanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.drawImage(editProfileBG, 0, 0, getWidth(), getHeight(), this);
-            }
-        };
-        editProfilePanel.setLayout(null);
-        editProfilePanel.setBounds(0, 0, 1000, 600); // Adjust as needed
-        
-        // Save Button
-        JButton saveButton = new JButton("Save");
-        saveButton.setBounds(150, 350, 100, 40);
-        saveButton.addActionListener(e -> {
-            // Save action logic
-            JOptionPane.showMessageDialog(this, "Profile updated successfully!");
-            // Switch back to dashboard panel after saving
-            ((CardLayout) getParent().getLayout()).show(getParent(), "Dashboard");
-        });
-        editProfilePanel.add(saveButton);
+       JButton goBackButton = new JButton(new ImageIcon("img/buttons/arrow.png")); // Replace with the actual path
+       goBackButton.setBounds(30, 20, 50, 50); // Adjust as needed
+       goBackButton.addActionListener(new ActionListener() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+               showDashboardFrame();
+           }
+       });
+       add(goBackButton);
 
-        // Adding editProfilePanel to the EditProfilePanel (which is now a JPanel)
-        add(editProfilePanel);
+       // Main Label
+       
+    }
+
+    private void showDashboardFrame() {
+        if (mainFrame == null) {
+            DashboardPanel dashboardFrame = new DashboardPanel(mainFrame);
+            setContentPane(dashboardFrame);
+            revalidate();
+            repaint();
+            
+        } else {
+            System.err.println("Error: MainFrame reference is null.");
+        }
     }
 }

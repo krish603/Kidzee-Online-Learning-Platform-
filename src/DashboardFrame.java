@@ -144,6 +144,17 @@ class DashboardPanel extends JPanel {
         cFrame.setVisible(true);
     }
 
+    private void showEditProfilePanel() {
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+
+        if (parentFrame != null) {
+            parentFrame.dispose(); // Close the parent JFrame
+        }
+
+        EditProfilePanel eFrame = new EditProfilePanel();
+        eFrame.setVisible(true);
+    }
+
     private JLabel createRoundedLabel(String imagePath, String hoverImagePath, int x, int y) {
         ImageIcon normalIcon = RoundedImage.getRoundedImage(new ImageIcon(imagePath).getImage(), 200, 100, 20);
         ImageIcon hoverIcon = RoundedImage.getRoundedImage(new ImageIcon(hoverImagePath).getImage(), 200, 100, 20);
@@ -164,17 +175,6 @@ class DashboardPanel extends JPanel {
         });
 
         return label;
-    }
-
-   private void showEditProfilePanel() {
-        if (mainFrame != null) { // Check if mainFrame is not null
-            EditProfilePanel editProfilePanel = new EditProfilePanel();
-            mainFrame.setContentPane(editProfilePanel);
-            mainFrame.revalidate();
-            mainFrame.repaint();
-        } else {
-            System.err.println("Error: MainFrame reference is null.");
-        }
     }    
 
     @Override
