@@ -14,6 +14,7 @@ public class NoticeManagementFrame extends JFrame {
     private JTextField pdfFilePathField;
     private JTextField searchField;
     private MainFrame mainFrame;
+    private JTextField idField;
     private DefaultTableModel tableModel;
     private JTable timetableTable;
     private JButton insertButton, updateButton, removeButton, resetButton, browseButton;
@@ -54,9 +55,13 @@ public class NoticeManagementFrame extends JFrame {
         idLabel.setBounds(50, 100, 100, 30);
         add(idLabel);
 
-        JLabel idValueLabel = new JLabel("T0005"); // Placeholder value
-        idValueLabel.setBounds(150, 100, 100, 30);
-        add(idValueLabel);
+        // JLabel idValueLabel = new JLabel("T0005"); // Placeholder value
+        // idValueLabel.setBounds(150, 100, 100, 30);
+        // add(idValueLabel);
+
+        idField = new JTextField();
+        idField.setBounds(150, 100, 100, 30);
+        getContentPane().add(idField);
 
         // Title
         JLabel titleLabel2 = new JLabel("Title");

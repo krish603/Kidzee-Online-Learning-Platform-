@@ -13,6 +13,7 @@ public class TimetableManagementFrame extends JFrame {
     private JComboBox<String> departmentComboBox;
     private JTextField pdfFilePathField;
     private MainFrame mainFrame;
+    private JTextField idField;
     private JTextField searchField;
     private DefaultTableModel tableModel;
     private JTable timetableTable;
@@ -54,9 +55,13 @@ public class TimetableManagementFrame extends JFrame {
         idLabel.setBounds(50, 100, 100, 30);
         add(idLabel);
 
-        JLabel idValueLabel = new JLabel("T0005"); // Placeholder value
-        idValueLabel.setBounds(150, 100, 100, 30);
-        add(idValueLabel);
+        // JLabel idValueLabel = new JLabel("T0005"); // Placeholder value
+        // idValueLabel.setBounds(150, 100, 100, 30);
+        // add(idValueLabel);
+
+        idField = new JTextField();
+        idField.setBounds(150, 100, 100, 30);
+        getContentPane().add(idField);
 
         // Title
         JLabel titleLabel2 = new JLabel("Title");
