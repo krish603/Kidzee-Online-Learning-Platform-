@@ -3,9 +3,11 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 public class CourseManagementPortal extends JFrame {
     private MainFrame mainFrame;
+    private JTextField pdfFilePathField;
     private JTextField courseIdField, nameField, creditField, depIdField, lecIdField, searchField;
     private JComboBox<String> isGpaComboBox, semesterComboBox;
     private JTable courseTable;
@@ -112,9 +114,22 @@ public class CourseManagementPortal extends JFrame {
         semesterComboBox.setBounds(370, 220, 220, 25);
         getContentPane().add(semesterComboBox);
 
-        JButton btnMaterials = new JButton("MATERIALS");
-        btnMaterials.setBounds(370, 260, 220, 30);
-        getContentPane().add(btnMaterials);
+        // JButton btnMaterials = new JButton("MATERIALS");
+        // btnMaterials.setBounds(370, 260, 220, 30);
+        // getContentPane().add(btnMaterials);
+
+        JLabel pdfLabel = new JLabel("Materials :");
+        pdfLabel.setBounds(280, 260, 100, 30);
+        add(pdfLabel);
+
+        pdfFilePathField = new JTextField();
+        pdfFilePathField.setBounds(370, 260, 220, 30);
+        add(pdfFilePathField);
+
+        JButton btnMaterials = new JButton("Browse PDF");
+        btnMaterials.setBounds(370, 300, 220, 30);
+        btnMaterials.addActionListener(e -> browseFile());
+        add(btnMaterials);
 
         // Right-side buttons
         JButton insertButton = new JButton("INSERT");
@@ -207,6 +222,16 @@ public class CourseManagementPortal extends JFrame {
                 }
             }
         });
+    }
+
+    private void browseFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Documents", "pdf"));
+        int returnValue = fileChooser.showOpenDialog(this);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            pdfFilePathField.setText(selectedFile.getAbsolutePath());
+        }
     }
 
     private void showDashboardFrame() {
