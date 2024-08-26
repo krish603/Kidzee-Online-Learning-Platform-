@@ -44,7 +44,7 @@ public class First_Interface extends JFrame {
         setContentPane(panel);
 
         // Set the frame properties
-        setTitle("Kidzee (Online Learning Program)");
+        setTitle("Kidzee E-Learning Platform");
         setSize(1025, 640);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // Center the frame

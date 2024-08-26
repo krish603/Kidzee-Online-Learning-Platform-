@@ -21,8 +21,9 @@ public class NoticeManagementFrame extends JFrame {
     private String[] departments = {"students", "lecturers", "departments"};
     
     public NoticeManagementFrame() {
-        setTitle("Notice Management Portal");
+        setTitle("Kidzee E-Learning Platform");
         setSize(1025, 640);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(null);
 
@@ -32,6 +33,10 @@ public class NoticeManagementFrame extends JFrame {
         headerPanel.setBounds(0, 0, 1025, 80);
         headerPanel.setLayout(null);
         add(headerPanel);
+
+        //on clicking this button this frame should close and DashboardPanel class should run
+
+        //go back button
 
         JButton goBackButton = new JButton(new ImageIcon("img/buttons/arrow.png")); // Replace with the actual path
         goBackButton.setBounds(30, 20, 50, 50); // Adjust as needed
@@ -215,15 +220,15 @@ public class NoticeManagementFrame extends JFrame {
     }
 
     private void showDashboardFrame() {
-        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-
-        if (parentFrame != null) {
-            parentFrame.dispose(); // Close the parent JFrame
+        if (mainFrame == null) {
+            DashboardPanel dashboardFrame = new DashboardPanel(mainFrame);
+            setContentPane(dashboardFrame);
+            revalidate();
+            repaint();
+            
+        } else {
+            System.err.println("Error: MainFrame reference is null.");
         }
-
-        // Create and show the new frame
-        DashboardPanel dFrame = new DashboardPanel(mainFrame);
-        dFrame.setVisible(true);
     }
 
 

@@ -6,7 +6,7 @@ public class MainFrame extends JFrame {
     private JPanel cardPanel;
 
     public MainFrame() {
-        setTitle("Dashboard Application");
+        setTitle("Kidzee E-Learning Platform");
         setSize(1025, 640);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);

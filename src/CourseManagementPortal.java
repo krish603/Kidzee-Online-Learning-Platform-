@@ -15,8 +15,9 @@ public class CourseManagementPortal extends JFrame {
 
     public CourseManagementPortal() {
         // Frame settings
-        setTitle("Course Management Portal");
+        setTitle("Kidzee E-Learning Platform");
         setSize(1025, 640);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setLayout(null);
 
@@ -235,13 +236,15 @@ public class CourseManagementPortal extends JFrame {
     }
 
     private void showDashboardFrame() {
-        dispose();
-
-        // Create and show the new frame
-        DashboardPanel dFrame = new DashboardPanel(mainFrame);
-        setContentPane(dFrame);
-        revalidate();
-        repaint();
+        if (mainFrame == null) {
+            DashboardPanel dashboardFrame = new DashboardPanel(mainFrame);
+            setContentPane(dashboardFrame);
+            revalidate();
+            repaint();
+            
+        } else {
+            System.err.println("Error: MainFrame reference is null.");
+        }
     }
 
     public static void main(String[] args) {

@@ -7,8 +7,9 @@ public class UserManagementPortal extends JFrame {
     
     public UserManagementPortal() {
         // Frame settings
-        setTitle("User Management Portal");
+        setTitle("Kidzee E-Learning Platform");
         setSize(1025, 640);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(null);
 
@@ -210,15 +211,15 @@ public class UserManagementPortal extends JFrame {
     }
 
     private void showDashboardFrame() {
-        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-
-        if (parentFrame != null) {
-            parentFrame.dispose(); // Close the parent JFrame
+        if (mainFrame == null) {
+            DashboardPanel dashboardFrame = new DashboardPanel(mainFrame);
+            setContentPane(dashboardFrame);
+            revalidate();
+            repaint();
+            
+        } else {
+            System.err.println("Error: MainFrame reference is null.");
         }
-
-        // Create and show the new frame
-        DashboardPanel dFrame = new DashboardPanel(mainFrame);
-        dFrame.setVisible(true);
     }
 
     public static void main(String[] args) {

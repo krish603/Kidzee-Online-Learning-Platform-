@@ -21,8 +21,9 @@ public class TimetableManagementFrame extends JFrame {
     private String[] departments = {"ICT", "ET", "BST"};
     
     public TimetableManagementFrame() {
-        setTitle("Timetable Management Portal");
+        setTitle("Kidzee E-Learning Platform");
         setSize(1025, 640);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(null);
 
@@ -208,15 +209,15 @@ public class TimetableManagementFrame extends JFrame {
     }
 
     private void showDashboardFrame() {
-        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-
-        if (parentFrame != null) {
-            parentFrame.dispose(); // Close the parent JFrame
+        if (mainFrame == null) {
+            DashboardPanel dashboardFrame = new DashboardPanel(mainFrame);
+            setContentPane(dashboardFrame);
+            revalidate();
+            repaint();
+            
+        } else {
+            System.err.println("Error: MainFrame reference is null.");
         }
-
-        // Create and show the new frame
-        DashboardPanel dFrame = new DashboardPanel(mainFrame);
-        dFrame.setVisible(true);
     }
 
     private void searchTimetable(String query) {
