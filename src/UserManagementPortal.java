@@ -1,10 +1,22 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.sql.*;
+import java.util.Vector;
 
 public class UserManagementPortal extends JFrame {
     private MainFrame mainFrame;
-    
+    private Connection conn; // Database connection
+    private DefaultTableModel model;
+    private JTextField idField, userNameField, nameField, emailField, dobField, addressField, contactField;
+    private JPasswordField passwordField;
+    private JComboBox<String> userTypeCombo, genderCombo, departmentCombo, levelCombo;
+    private JTable userTable;
+
     public UserManagementPortal() {
         // Frame settings
         setTitle("Kidzee E-Learning Platform");
@@ -13,6 +25,24 @@ public class UserManagementPortal extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(null);
 
+        // Database connection
+        connectToDatabase();
+
+        // UI Setup
+        setupUI();
+        loadUserData(); // Load data from the database
+    }
+
+    private void connectToDatabase() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/kidzee_login", "root", ""); // Update with your DB credentials
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setupUI() {
         // Top Panel
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(new Color(100, 149, 237));
@@ -37,13 +67,23 @@ public class UserManagementPortal extends JFrame {
         facultyLabel.setBounds(420, 50, 200, 20);
         headerPanel.add(facultyLabel);
 
-        // Left Section for User Details
+        // Left Panel
+        setupLeftPanel();
+
+        // Right Panel
+        setupRightPanel();
+
+        // Table Panel
+        setupTablePanel();
+    }
+
+    private void setupLeftPanel() {
         JPanel leftPanel = new JPanel();
         leftPanel.setBounds(20, 110, 520, 230);
         leftPanel.setLayout(null);
         leftPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 
-        String[] labels1 = {"ID", "User Name", "Name", "Email", "Password","Contact No", "UserType"};
+        String[] labels1 = {"ID", "User Name", "Name", "Email", "Password", "Contact No", "UserType"};
         String[] labels2 = {"Gender", "Department", "DOB", "Address", "Level"};
 
         int yPos1 = 20;
@@ -54,31 +94,31 @@ public class UserManagementPortal extends JFrame {
             yPos1 += 30;
         }
 
-        JTextField idField = new JTextField();
+        idField = new JTextField();
         idField.setBounds(90, 20, 150, 25);
         leftPanel.add(idField);
 
-        JTextField userNameField = new JTextField();
+        userNameField = new JTextField();
         userNameField.setBounds(90, 50, 150, 25);
         leftPanel.add(userNameField);
 
-        JTextField nameField = new JTextField();
+        nameField = new JTextField();
         nameField.setBounds(90, 80, 150, 25);
         leftPanel.add(nameField);
 
-        JTextField emailField = new JTextField();
+        emailField = new JTextField();
         emailField.setBounds(90, 110, 150, 25);
         leftPanel.add(emailField);
 
-        JPasswordField passwordField = new JPasswordField();
+        passwordField = new JPasswordField();
         passwordField.setBounds(90, 140, 150, 25);
         leftPanel.add(passwordField);
 
-        JTextField contactField = new JTextField();
+        contactField = new JTextField();
         contactField.setBounds(90, 170, 150, 25);
         leftPanel.add(contactField);
 
-        JComboBox<String> userTypeCombo = new JComboBox<>(new String[] {"student", "lecturer", "admin"});
+        userTypeCombo = new JComboBox<>(new String[] {"student", "lecturer", "admin"});
         userTypeCombo.setBounds(90, 200, 150, 25);
         leftPanel.add(userTypeCombo);
 
@@ -90,51 +130,64 @@ public class UserManagementPortal extends JFrame {
             yPos2 += 40;
         }
 
-        JComboBox<String> genderCombo = new JComboBox<>(new String[] {"male", "female"});
+        genderCombo = new JComboBox<>(new String[] {"male", "female"});
         genderCombo.setBounds(360, 20, 150, 25);
         leftPanel.add(genderCombo);
 
-        JComboBox<String> departmentCombo = new JComboBox<>(new String[] {"ict", "bst", "et"});
+        departmentCombo = new JComboBox<>(new String[] {"ict", "bst", "et"});
         departmentCombo.setBounds(360, 60, 150, 25);
         leftPanel.add(departmentCombo);
 
-        JTextField dobField = new JTextField();
+        dobField = new JTextField();
         dobField.setBounds(360, 100, 150, 25);
         leftPanel.add(dobField);
 
-        JTextField addressField = new JTextField();
+        addressField = new JTextField();
         addressField.setBounds(360, 140, 150, 25);
         leftPanel.add(addressField);
 
-        JComboBox<String> levelCombo = new JComboBox<>(new String[] {"L1S1", "L1S2", "NULL"});
+        levelCombo = new JComboBox<>(new String[] {"L1S1", "L1S2", "NULL"});
         levelCombo.setBounds(360, 180, 150, 25);
         leftPanel.add(levelCombo);
 
         add(leftPanel);
+    }
 
-        // Right Section for Buttons
+    private void setupRightPanel() {
         JPanel rightPanel = new JPanel();
         rightPanel.setBounds(560, 110, 440, 100);
         rightPanel.setLayout(new GridLayout(2, 2, 10, 10));
 
         JButton insertButton = new JButton("INSERT");
+        insertButton.addActionListener(e -> insertUser());
         rightPanel.add(insertButton);
 
         JButton updateButton = new JButton("UPDATE");
+        updateButton.addActionListener(e -> updateUser());
         rightPanel.add(updateButton);
 
         JButton removeButton = new JButton("REMOVE");
+        removeButton.addActionListener(e -> removeUser());
         rightPanel.add(removeButton);
 
         JTextField searchField = new JTextField();
+        // searchField.addActionListener(e -> searchUser(searchField.getText()));
+        searchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                searchUser(searchField.getText());
+            }
+        });
         rightPanel.add(searchField);
 
         JButton resetButton = new JButton("RESET");
+        resetButton.addActionListener(e -> resetFields());
         rightPanel.add(resetButton);
 
         add(rightPanel);
+    }
 
-        // Table Section
+    private void setupTablePanel() {
         JPanel tablePanel = new JPanel();
         tablePanel.setBounds(20, 350, 980, 200);
         tablePanel.setLayout(new BorderLayout());
@@ -142,41 +195,79 @@ public class UserManagementPortal extends JFrame {
         String[] columnNames = {"id", "username", "name", "email", "password", "userType", "gender", "dob", 
                                 "contactNumber", "address", "depID", "Level/Sem"};
 
-        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
-        JTable userTable = new JTable(model);
+        model = new DefaultTableModel(columnNames, 0);
+        userTable = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(userTable);
         tablePanel.add(scrollPane, BorderLayout.CENTER);
 
         add(tablePanel);
+    }
 
-        // Sample Data for testing
-        model.addRow(new Object[]{"A0001", "admin", "Admin Name", "admin@example.com", "adminpass", "admin", 
-                                  "male", "2000-01-01", "1234567890", "Address", "ict", "NULL"});
-        model.addRow(new Object[]{"S0002", "student1", "Student Name", "student@example.com", "studentpass", "student", 
-                                  "female", "1999-02-15", "0987654321", "Address", "et", "L1S1"});
+    private void loadUserData() {
+        try {
+            String query = "SELECT * FROM users";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
 
-        // Button Functionality (Sample)
-        insertButton.addActionListener(e -> {
-            String id = idField.getText();
-            String username = userNameField.getText();
-            String name = nameField.getText();
-            String email = emailField.getText();
-            String password = new String(passwordField.getPassword());
-            String contactNo = contactField.getText();
-            String userType = (String) userTypeCombo.getSelectedItem();
-            String gender = (String) genderCombo.getSelectedItem();
-            String department = (String) departmentCombo.getSelectedItem();
-            String dob = dobField.getText();
-            String address = addressField.getText();
-            String level = (String) levelCombo.getSelectedItem();
+            while (rs.next()) {
+                Vector<String> row = new Vector<>();
+                for (int i = 1; i <= 12; i++) {
+                    row.add(rs.getString(i));
+                }
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-            model.addRow(new Object[]{id, username, name, email, password, userType, gender, dob, contactNo, address, department, level});
-        });
+    private void insertUser() {
+        try {
+            String query = "INSERT INTO users (id, username, name, email, password, userType, gender, dob, contactNumber, address, depID, level) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, idField.getText());
+            stmt.setString(2, userNameField.getText());
+            stmt.setString(3, nameField.getText());
+            stmt.setString(4, emailField.getText());
+            stmt.setString(5, new String(passwordField.getPassword()));
+            stmt.setString(6, (String) userTypeCombo.getSelectedItem());
+            stmt.setString(7, (String) genderCombo.getSelectedItem());
+            stmt.setString(8, dobField.getText());
+            stmt.setString(9, contactField.getText());
+            stmt.setString(10, addressField.getText());
+            stmt.setString(11, (String) departmentCombo.getSelectedItem());
+            stmt.setString(12, (String) levelCombo.getSelectedItem());
+            stmt.executeUpdate();
 
-        updateButton.addActionListener(e -> {
-            int selectedRow = userTable.getSelectedRow();
-            if (selectedRow != -1) {
-                model.setValueAt(idField.getText(), selectedRow, 0);
+            model.addRow(new Object[]{idField.getText(), userNameField.getText(), nameField.getText(), emailField.getText(), new String(passwordField.getPassword()), 
+                                      userTypeCombo.getSelectedItem(), genderCombo.getSelectedItem(), dobField.getText(), contactField.getText(), addressField.getText(), 
+                                      departmentCombo.getSelectedItem(), levelCombo.getSelectedItem()});
+            resetFields();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateUser() {
+        int selectedRow = userTable.getSelectedRow();
+        if (selectedRow != -1) {
+            try {
+                String query = "UPDATE users SET username=?, name=?, email=?, password=?, userType=?, gender=?, dob=?, contactNumber=?, address=?, depID=?, level=? WHERE id=?";
+                PreparedStatement stmt = conn.prepareStatement(query);
+                stmt.setString(1, userNameField.getText());
+                stmt.setString(2, nameField.getText());
+                stmt.setString(3, emailField.getText());
+                stmt.setString(4, new String(passwordField.getPassword()));
+                stmt.setString(5, (String) userTypeCombo.getSelectedItem());
+                stmt.setString(6, (String) genderCombo.getSelectedItem());
+                stmt.setString(7, dobField.getText());
+                stmt.setString(8, contactField.getText());
+                stmt.setString(9, addressField.getText());
+                stmt.setString(10, (String) departmentCombo.getSelectedItem());
+                stmt.setString(11, (String) levelCombo.getSelectedItem());
+                stmt.setString(12, idField.getText());
+                stmt.executeUpdate();
+
                 model.setValueAt(userNameField.getText(), selectedRow, 1);
                 model.setValueAt(nameField.getText(), selectedRow, 2);
                 model.setValueAt(emailField.getText(), selectedRow, 3);
@@ -188,26 +279,44 @@ public class UserManagementPortal extends JFrame {
                 model.setValueAt(addressField.getText(), selectedRow, 9);
                 model.setValueAt(departmentCombo.getSelectedItem(), selectedRow, 10);
                 model.setValueAt(levelCombo.getSelectedItem(), selectedRow, 11);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        });
+        }
+    }
 
-        removeButton.addActionListener(e -> {
-            int selectedRow = userTable.getSelectedRow();
-            if (selectedRow != -1) {
+    private void removeUser() {
+        int selectedRow = userTable.getSelectedRow();
+        if (selectedRow != -1) {
+            try {
+                String query = "DELETE FROM users WHERE id=?";
+                PreparedStatement stmt = conn.prepareStatement(query);
+                stmt.setString(1, (String) model.getValueAt(selectedRow, 0));
+                stmt.executeUpdate();
+
                 model.removeRow(selectedRow);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        });
+        }
+    }
 
-        resetButton.addActionListener(e -> {
-            idField.setText("");
-            userNameField.setText("");
-            nameField.setText("");
-            emailField.setText("");
-            passwordField.setText("");
-            contactField.setText("");
-            dobField.setText("");
-            addressField.setText("");
-        });
+    private void searchUser(String query) {
+        // Search in the timetable table
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        userTable.setRowSorter(sorter);
+        sorter.setRowFilter(RowFilter.regexFilter(query));
+    }
+
+    private void resetFields() {
+        idField.setText("");
+        userNameField.setText("");
+        nameField.setText("");
+        emailField.setText("");
+        passwordField.setText("");
+        contactField.setText("");
+        dobField.setText("");
+        addressField.setText("");
     }
 
     private void showDashboardFrame() {
@@ -216,7 +325,6 @@ public class UserManagementPortal extends JFrame {
             setContentPane(dashboardFrame);
             revalidate();
             repaint();
-            
         } else {
             System.err.println("Error: MainFrame reference is null.");
         }

@@ -133,7 +133,7 @@ public class First_Interface extends JFrame {
                 Class.forName("com.mysql.cj.jdbc.Driver");
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
-            }
+            }   
         }
 
         public static Connection getConnection() throws SQLException {

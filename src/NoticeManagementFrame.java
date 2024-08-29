@@ -6,6 +6,11 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Vector;
 
 public class NoticeManagementFrame extends JFrame {
@@ -165,45 +170,121 @@ public class NoticeManagementFrame extends JFrame {
     }
 
     private void insertTimetable() {
-        // Insert new timetable to the table
-        String id = "T000" + (tableModel.getRowCount() + 1); // Generate new ID
+        String id = "N000" + (tableModel.getRowCount() + 1); // Generate new ID
         String department = departmentComboBox.getSelectedItem().toString();
         String title = titleField.getText();
         String pdfPath = pdfFilePathField.getText();
-
+        
         if (!title.isEmpty() && !pdfPath.isEmpty()) {
-            Vector<String> row = new Vector<>();
-            row.add(id);
-            row.add(department);
-            row.add(title);
-            row.add("Download");
-            tableModel.addRow(row);
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement("INSERT INTO notices (id, department, title, pdf_path) VALUES (?, ?, ?, ?)")) {
+                
+                stmt.setString(1, id);
+                stmt.setString(2, department);
+                stmt.setString(3, title);
+                stmt.setString(4, pdfPath);
+                stmt.executeUpdate();
+                
+                // Add to table model
+                Vector<String> row = new Vector<>();
+                row.add(id);
+                row.add(department);
+                row.add(title);
+                row.add("Download");
+                tableModel.addRow(row);
+                
+                JOptionPane.showMessageDialog(this, "Notice inserted successfully!");
+                
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Error inserting notice: " + e.getMessage());
+                e.printStackTrace();
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Please fill in all the fields!");
         }
     }
-
+    
     private void updateTimetable() {
-        // Update selected timetable
         int selectedRow = timetableTable.getSelectedRow();
         if (selectedRow != -1) {
-            tableModel.setValueAt(departmentComboBox.getSelectedItem(), selectedRow, 1);
-            tableModel.setValueAt(titleField.getText(), selectedRow, 2);
-            tableModel.setValueAt("Download", selectedRow, 3);
+            String id = (String) tableModel.getValueAt(selectedRow, 0);
+            String department = departmentComboBox.getSelectedItem().toString();
+            String title = titleField.getText();
+            String pdfPath = pdfFilePathField.getText();
+        
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement("UPDATE notices SET department = ?, title = ?, pdf_path = ? WHERE id = ?")) {
+                
+                stmt.setString(1, department);
+                stmt.setString(2, title);
+                stmt.setString(3, pdfPath);
+                stmt.setString(4, id);
+                stmt.executeUpdate();
+                
+                // Update table model
+                tableModel.setValueAt(department, selectedRow, 1);
+                tableModel.setValueAt(title, selectedRow, 2);
+                tableModel.setValueAt("Download", selectedRow, 3);
+                
+                JOptionPane.showMessageDialog(this, "Notice updated successfully!");
+                
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Error updating notice: " + e.getMessage());
+                e.printStackTrace();
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "Please select a timetable to update!");
+            JOptionPane.showMessageDialog(this, "Please select a notice to update!");
+        }
+    }
+    
+    private void removeTimetable() {
+        int selectedRow = timetableTable.getSelectedRow();
+        if (selectedRow != -1) {
+            String id = (String) tableModel.getValueAt(selectedRow, 0);
+        
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement("DELETE FROM notices WHERE id = ?")) {
+                
+                stmt.setString(1, id);
+                stmt.executeUpdate();
+                
+                tableModel.removeRow(selectedRow);
+                
+                JOptionPane.showMessageDialog(this, "Notice removed successfully!");
+                
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Error removing notice: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a notice to remove!");
+        }
+    }
+    
+    private void addSampleData() {
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM notices")) {
+            
+            while (rs.next()) {
+                String id = rs.getString("id");
+                String department = rs.getString("department");
+                String title = rs.getString("title");
+                String pdfPath = rs.getString("pdf_path");
+            
+                Vector<String> row = new Vector<>();
+                row.add(id);
+                row.add(department);
+                row.add(title);
+                row.add(pdfPath);
+                tableModel.addRow(row);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error loading sample data: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private void removeTimetable() {
-        // Remove selected timetable
-        int selectedRow = timetableTable.getSelectedRow();
-        if (selectedRow != -1) {
-            tableModel.removeRow(selectedRow);
-        } else {
-            JOptionPane.showMessageDialog(this, "Please select a timetable to remove!");
-        }
-    }
 
     private void resetFields() {
         // Reset input fields
@@ -229,14 +310,6 @@ public class NoticeManagementFrame extends JFrame {
         } else {
             System.err.println("Error: MainFrame reference is null.");
         }
-    }
-
-
-    private void addSampleData() {
-        // Sample data to test
-        tableModel.addRow(new Object[]{"T0001", "ICT", "TT for ICT Dep 2023 All Batches", "Download"});
-        tableModel.addRow(new Object[]{"T0002", "ET", "TT for ET Dep 2023 All Batches", "Download"});
-        tableModel.addRow(new Object[]{"T0003", "BST", "TT for BST Dep 2023 All Batches", "Download"});
     }
 
     public static void main(String[] args) {

@@ -6,6 +6,13 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Vector;
 
 public class TimetableManagementFrame extends JFrame {
@@ -19,6 +26,11 @@ public class TimetableManagementFrame extends JFrame {
     private JTable timetableTable;
     private JButton insertButton, updateButton, removeButton, resetButton, browseButton;
     private String[] departments = {"ICT", "ET", "BST"};
+
+    // HashMap for quick access to timetables by ID
+    private HashMap<String, Timetable> timetableMap = new HashMap<>();
+    // LinkedList to maintain order of timetables
+    private LinkedList<Timetable> timetableList = new LinkedList<>();
     
     public TimetableManagementFrame() {
         setTitle("Kidzee E-Learning Platform");
@@ -161,45 +173,134 @@ public class TimetableManagementFrame extends JFrame {
     }
 
     private void insertTimetable() {
-        // Insert new timetable to the table
         String id = "T000" + (tableModel.getRowCount() + 1); // Generate new ID
         String department = departmentComboBox.getSelectedItem().toString();
         String title = titleField.getText();
         String pdfPath = pdfFilePathField.getText();
 
         if (!title.isEmpty() && !pdfPath.isEmpty()) {
-            Vector<String> row = new Vector<>();
-            row.add(id);
-            row.add(department);
-            row.add(title);
-            row.add("Download");
-            tableModel.addRow(row);
+            Timetable timetable = new Timetable(id, department, title, pdfPath);
+
+            // Save to database
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement("INSERT INTO timetables (id, department, title, pdf_path) VALUES (?, ?, ?, ?)")) {
+                
+                stmt.setString(1, id);
+                stmt.setString(2, department);
+                stmt.setString(3, title);
+                stmt.setString(4, pdfPath);
+                stmt.executeUpdate();
+                
+                // Add to data structures
+                timetableMap.put(id, timetable);
+                timetableList.add(timetable);
+
+                Vector<String> row = new Vector<>();
+                row.add(id);
+                row.add(department);
+                row.add(title);
+                row.add("Download");
+                tableModel.addRow(row);
+                
+                JOptionPane.showMessageDialog(this, "Timetable inserted successfully!");
+
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Error inserting timetable: " + e.getMessage());
+                e.printStackTrace();
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Please fill in all the fields!");
         }
     }
 
     private void updateTimetable() {
-        // Update selected timetable
         int selectedRow = timetableTable.getSelectedRow();
         if (selectedRow != -1) {
-            tableModel.setValueAt(departmentComboBox.getSelectedItem(), selectedRow, 1);
-            tableModel.setValueAt(titleField.getText(), selectedRow, 2);
-            tableModel.setValueAt("Download", selectedRow, 3);
+            String id = (String) tableModel.getValueAt(selectedRow, 0);
+            Timetable timetable = timetableMap.get(id);
+            if (timetable != null) {
+                // Update the data
+                timetable.setDepartment(departmentComboBox.getSelectedItem().toString());
+                timetable.setTitle(titleField.getText());
+                timetable.setPdfPath("Download");
+
+                // Update database
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement stmt = conn.prepareStatement("UPDATE timetables SET department = ?, title = ?, pdf_path = ? WHERE id = ?")) {
+                    
+                    stmt.setString(1, timetable.getDepartment());
+                    stmt.setString(2, timetable.getTitle());
+                    stmt.setString(3, timetable.getPdfPath());
+                    stmt.setString(4, id);
+                    stmt.executeUpdate();
+                    
+                    // Update table
+                    tableModel.setValueAt(departmentComboBox.getSelectedItem(), selectedRow, 1);
+                    tableModel.setValueAt(titleField.getText(), selectedRow, 2);
+                    tableModel.setValueAt("Download", selectedRow, 3);
+                    
+                    JOptionPane.showMessageDialog(this, "Timetable updated successfully!");
+
+                } catch (SQLException e) {
+                    JOptionPane.showMessageDialog(this, "Error updating timetable: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Please select a timetable to update!");
         }
     }
 
     private void removeTimetable() {
-        // Remove selected timetable
         int selectedRow = timetableTable.getSelectedRow();
         if (selectedRow != -1) {
-            tableModel.removeRow(selectedRow);
+            String id = (String) tableModel.getValueAt(selectedRow, 0);
+
+            // Remove from database
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement("DELETE FROM timetables WHERE id = ?")) {
+                
+                stmt.setString(1, id);
+                stmt.executeUpdate();
+                
+                timetableMap.remove(id);
+                timetableList.removeIf(timetable -> timetable.getId().equals(id));
+                tableModel.removeRow(selectedRow);
+                
+                JOptionPane.showMessageDialog(this, "Timetable removed successfully!");
+
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Error removing timetable: " + e.getMessage());
+                e.printStackTrace();
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Please select a timetable to remove!");
         }
     }
+
+    private void addSampleData() {
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM timetables")) {
+            
+            while (rs.next()) {
+                String id = rs.getString("id");
+                String department = rs.getString("department");
+                String title = rs.getString("title");
+                String pdfPath = rs.getString("pdf_path");
+
+                Timetable timetable = new Timetable(id, department, title, pdfPath);
+                timetableMap.put(id, timetable);
+                timetableList.add(timetable);
+
+                tableModel.addRow(new Object[]{id, department, title, pdfPath});
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error loading sample data: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 
     private void resetFields() {
         // Reset input fields
@@ -227,13 +328,6 @@ public class TimetableManagementFrame extends JFrame {
         sorter.setRowFilter(RowFilter.regexFilter(query));
     }
 
-    private void addSampleData() {
-        // Sample data to test
-        tableModel.addRow(new Object[]{"T0001", "ICT", "TT for ICT Dep 2023 All Batches", "Download"});
-        tableModel.addRow(new Object[]{"T0002", "ET", "TT for ET Dep 2023 All Batches", "Download"});
-        tableModel.addRow(new Object[]{"T0003", "BST", "TT for BST Dep 2023 All Batches", "Download"});
-    }
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(TimetableManagementFrame::new);
     }
@@ -250,6 +344,48 @@ class ButtonRenderer extends JButton implements TableCellRenderer {
                                                    boolean isSelected, boolean hasFocus, int row, int column) {
         setText((value == null) ? "" : value.toString());
         return this;
+    }
+}
+
+class Timetable {
+    private String id;
+    private String department;
+    private String title;
+    private String pdfPath;
+
+    public Timetable(String id, String department, String title, String pdfPath) {
+        this.id = id;
+        this.department = department;
+        this.title = title;
+        this.pdfPath = pdfPath;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getPdfPath() {
+        return pdfPath;
+    }
+
+    public void setPdfPath(String pdfPath) {
+        this.pdfPath = pdfPath;
     }
 }
 

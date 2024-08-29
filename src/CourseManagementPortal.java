@@ -1,17 +1,34 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class CourseManagementPortal extends JFrame {
     private MainFrame mainFrame;
     private JTextField pdfFilePathField;
     private JTextField courseIdField, nameField, creditField, depIdField, lecIdField, searchField;
+    private JTextArea descriptionField;
     private JComboBox<String> isGpaComboBox, semesterComboBox;
     private JTable courseTable;
     private DefaultTableModel tableModel;
+    private final String DB_URL = "jdbc:mysql://localhost:3306/kidzee_login"; // Replace with your database name
+    private final String DB_USER = "root"; // Replace with your database username
+    private final String DB_PASSWORD = "";
+
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+    }
 
     public CourseManagementPortal() {
         // Frame settings
@@ -103,7 +120,7 @@ public class CourseManagementPortal extends JFrame {
         lblDescription.setBounds(280, 100, 80, 25);
         getContentPane().add(lblDescription);
 
-        JTextArea descriptionField = new JTextArea();
+        descriptionField = new JTextArea();
         descriptionField.setBounds(370, 100, 220, 100);
         getContentPane().add(descriptionField);
 
@@ -151,11 +168,17 @@ public class CourseManagementPortal extends JFrame {
 
         searchField = new JTextField();
         searchField.setBounds(620, 260, 100, 30);
+        searchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                searchCourse(searchField.getText());
+            }
+        });
         getContentPane().add(searchField);
 
-        JButton searchButton = new JButton("SEARCH");
-        searchButton.setBounds(740, 260, 100, 30);
-        getContentPane().add(searchButton);
+        // JButton searchButton = new JButton("SEARCH");
+        // searchButton.setBounds(740, 260, 100, 30);
+        // getContentPane().add(searchButton);
 
         // Table
         String[] columnNames = {"CourseID", "CourseName", "Credit", "isGPA", "Description", "Materials", "userID", "DepID", "LevelSem"};
@@ -165,43 +188,9 @@ public class CourseManagementPortal extends JFrame {
         scrollPane.setBounds(30, 340, 950, 250);
         getContentPane().add(scrollPane);
 
-        // Action listeners
-        insertButton.addActionListener(e -> {
-            String[] data = {
-                    courseIdField.getText(),
-                    nameField.getText(),
-                    creditField.getText(),
-                    isGpaComboBox.getSelectedItem().toString(),
-                    descriptionField.getText(),
-                    "Download",  // Placeholder for Materials button
-                    lecIdField.getText(),
-                    depIdField.getText(),
-                    semesterComboBox.getSelectedItem().toString()
-            };
-            tableModel.addRow(data);
-        });
-
-        updateButton.addActionListener(e -> {
-            int selectedRow = courseTable.getSelectedRow();
-            if (selectedRow >= 0) {
-                tableModel.setValueAt(courseIdField.getText(), selectedRow, 0);
-                tableModel.setValueAt(nameField.getText(), selectedRow, 1);
-                tableModel.setValueAt(creditField.getText(), selectedRow, 2);
-                tableModel.setValueAt(isGpaComboBox.getSelectedItem(), selectedRow, 3);
-                tableModel.setValueAt(descriptionField.getText(), selectedRow, 4);
-                tableModel.setValueAt("Download", selectedRow, 5);  // Placeholder for Materials button
-                tableModel.setValueAt(lecIdField.getText(), selectedRow, 6);
-                tableModel.setValueAt(depIdField.getText(), selectedRow, 7);
-                tableModel.setValueAt(semesterComboBox.getSelectedItem(), selectedRow, 8);
-            }
-        });
-
-        removeButton.addActionListener(e -> {
-            int selectedRow = courseTable.getSelectedRow();
-            if (selectedRow >= 0) {
-                tableModel.removeRow(selectedRow);
-            }
-        });
+        insertButton.addActionListener(e -> insertCourse());
+        updateButton.addActionListener(e -> updateCourse());
+        removeButton.addActionListener(e -> removeCourse());
 
         resetButton.addActionListener(e -> {
             courseIdField.setText("");
@@ -213,16 +202,83 @@ public class CourseManagementPortal extends JFrame {
             depIdField.setText("");
             semesterComboBox.setSelectedIndex(0);
         });
+    }
 
-        searchButton.addActionListener(e -> {
-            String searchText = searchField.getText();
-            for (int row = 0; row < tableModel.getRowCount(); row++) {
-                if (tableModel.getValueAt(row, 0).toString().contains(searchText)) {
-                    courseTable.setRowSelectionInterval(row, row);
-                    break;
-                }
+    private void insertCourse() {
+        String sql = "INSERT INTO courses (courseId, name, credit, isGpa, description, materials, userId, depId, levelSem) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, courseIdField.getText());
+            pstmt.setString(2, nameField.getText());
+            pstmt.setInt(3, Integer.parseInt(creditField.getText()));
+            pstmt.setString(4, isGpaComboBox.getSelectedItem().toString());
+            pstmt.setString(5, descriptionField.getText());
+            pstmt.setString(6, pdfFilePathField.getText());
+            pstmt.setString(7, lecIdField.getText());
+            pstmt.setString(8, depIdField.getText());
+            pstmt.setString(9, semesterComboBox.getSelectedItem().toString());
+            pstmt.executeUpdate();
+            tableModel.addRow(new Object[]{courseIdField.getText(), nameField.getText(), creditField.getText(), isGpaComboBox.getSelectedItem().toString(), descriptionField.getText(), pdfFilePathField.getText(), lecIdField.getText(), depIdField.getText(), semesterComboBox.getSelectedItem().toString()});
+            JOptionPane.showMessageDialog(this, "Course added successfully!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Update course in the database
+    private void updateCourse() {
+        int selectedRow = courseTable.getSelectedRow();
+        if (selectedRow >= 0) {
+            String courseId = courseIdField.getText();
+            String sql = "UPDATE courses SET name=?, credit=?, isGpa=?, description=?, materials=?, userId=?, depId=?, levelSem=? WHERE courseId=?";
+            try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, nameField.getText());
+                pstmt.setInt(2, Integer.parseInt(creditField.getText()));
+                pstmt.setString(3, isGpaComboBox.getSelectedItem().toString());
+                pstmt.setString(4, descriptionField.getText());
+                pstmt.setString(5, pdfFilePathField.getText());
+                pstmt.setString(6, lecIdField.getText());
+                pstmt.setString(7, depIdField.getText());
+                pstmt.setString(8, semesterComboBox.getSelectedItem().toString());
+                pstmt.setString(9, courseId);
+                pstmt.executeUpdate();
+                tableModel.setValueAt(nameField.getText(), selectedRow, 1);
+                tableModel.setValueAt(creditField.getText(), selectedRow, 2);
+                tableModel.setValueAt(isGpaComboBox.getSelectedItem().toString(), selectedRow, 3);
+                tableModel.setValueAt(descriptionField.getText(), selectedRow, 4);
+                tableModel.setValueAt(pdfFilePathField.getText(), selectedRow, 5);
+                tableModel.setValueAt(lecIdField.getText(), selectedRow, 6);
+                tableModel.setValueAt(depIdField.getText(), selectedRow, 7);
+                tableModel.setValueAt(semesterComboBox.getSelectedItem().toString(), selectedRow, 8);
+                JOptionPane.showMessageDialog(this, "Course updated successfully!");
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        });
+        }
+    }
+
+    // Remove course from the database
+    private void removeCourse() {
+        int selectedRow = courseTable.getSelectedRow();
+        if (selectedRow >= 0) {
+            String courseId = courseTable.getValueAt(selectedRow, 0).toString();
+            String sql = "DELETE FROM courses WHERE courseId=?";
+            try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, courseId);
+                pstmt.executeUpdate();
+                tableModel.removeRow(selectedRow);
+                JOptionPane.showMessageDialog(this, "Course removed successfully!");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Search for a course in the database
+    private void searchCourse(String query) {
+        // Search in the timetable table
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        courseTable.setRowSorter(sorter);
+        sorter.setRowFilter(RowFilter.regexFilter(query));
     }
 
     private void browseFile() {
