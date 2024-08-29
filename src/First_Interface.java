@@ -62,7 +62,7 @@ public class First_Interface extends JFrame {
         });
     }
 
-    private void showSelectionPage() {
+    void showSelectionPage() {
         ImageIcon icon = new ImageIcon("img/OptionPageBG.png");
         Image backgroundImage = icon.getImage();
 

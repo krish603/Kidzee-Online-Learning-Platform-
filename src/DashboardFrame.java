@@ -44,7 +44,7 @@ class DashboardPanel extends JPanel {
         // User logout button with image
         JButton logoutButton = new JButton(new ImageIcon("img/buttons/logout.png")); // Replace with the actual path
         logoutButton.setBounds(70, 370, 100, 50); // Adjust as needed
-        logoutButton.addActionListener(e -> logout());
+        logoutButton.addActionListener(e -> logout()); // Call the logout method
         add(logoutButton);
 
         notificationBellButton = new JButton(new ImageIcon("img/notification_bell.png"));
@@ -107,10 +107,9 @@ class DashboardPanel extends JPanel {
     
         if (parentFrame instanceof First_Interface) {
             First_Interface firstInterface = (First_Interface) parentFrame;
-            firstInterface.resetAndShowOptions(); // Reset and show options after loading
+            firstInterface.showSelectionPage(); // Reset and show options after loading
         }
-    }
-    
+    }    
 
     private List<String> fetchNoticesFromDatabase() {
         List<String> notices = new ArrayList<>();
