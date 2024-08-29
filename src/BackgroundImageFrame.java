@@ -127,7 +127,7 @@ public class BackgroundImageFrame extends JFrame {
             loginButton.addActionListener(e -> {
                 String username = usernameField.getText();
                 String password = new String(passwordField.getPassword());
-                boolean authenticated = UserAuthenticator.authenticate(username, password);
+                boolean authenticated = AdminAuthenticator.authenticate(username, password);
                 if (authenticated) {
                     JOptionPane.showMessageDialog(null, "Login successful!");
                     // Proceed to the next step in your application
@@ -167,10 +167,36 @@ class DatabaseConnection {
     }
 }
 
+// Admin Authentication
+class AdminAuthenticator {
+    public static boolean authenticate(String username, String password) {
+        String query = "SELECT * FROM admin_login WHERE username = ? AND password = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+
+            System.out.println("Executing query: " + preparedStatement.toString()); // Debug statement
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                System.out.println("User authenticated: " + username); // Debug statement
+                return true;
+            } else {
+                System.out.println("Authentication failed for user: " + username); // Debug statement
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+}
+
 // User Authentication
 class UserAuthenticator {
     public static boolean authenticate(String username, String password) {
-        String query = "SELECT * FROM users WHERE username = ? AND password = ?";
+        String query = "SELECT * FROM user_login WHERE username = ? AND password = ?";
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, username);

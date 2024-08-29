@@ -1,9 +1,15 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 class DashboardPanel extends JPanel {
     private Image backgroundImage;
+    private JButton notificationBellButton;
+    
+    @SuppressWarnings("unused")
     private MainFrame mainFrame;
     // private First_Interface firstInterface;
 
@@ -38,16 +44,12 @@ class DashboardPanel extends JPanel {
         // User logout button with image
         JButton logoutButton = new JButton(new ImageIcon("img/buttons/logout.png")); // Replace with the actual path
         logoutButton.setBounds(70, 370, 100, 50); // Adjust as needed
+        logoutButton.addActionListener(e -> logout());
         add(logoutButton);
 
-        JLabel adminPanelLabel = new JLabel("Admin Panel");
-        adminPanelLabel.setForeground(Color.WHITE);
-        adminPanelLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-        adminPanelLabel.setBounds(70, 560, 200, 30);
-        add(adminPanelLabel);
-
-        JButton notificationBellButton = new JButton(new ImageIcon("img/notification_bell.png"));
+        notificationBellButton = new JButton(new ImageIcon("img/notification_bell.png"));
         notificationBellButton.setBounds(910, 20, 50, 50); 
+        notificationBellButton.addActionListener(e -> showNoticesPopup(notificationBellButton)); // Add this line
         add(notificationBellButton);
 
         JLabel studentLabel = createRoundedLabel("img/students.png", "img/students_hover.png", 320, 100);
@@ -99,6 +101,66 @@ class DashboardPanel extends JPanel {
         greyBox.setBounds(320, 250, 650, 300); // Example positioning, adjust as needed
         add(greyBox);
     }
+
+    private void logout() {
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+    
+        if (parentFrame instanceof First_Interface) {
+            First_Interface firstInterface = (First_Interface) parentFrame;
+            firstInterface.resetAndShowOptions(); // Reset and show options after loading
+        }
+    }
+    
+
+    private List<String> fetchNoticesFromDatabase() {
+        List<String> notices = new ArrayList<>();
+        
+        // Database connection parameters
+        final String DB_URL = "jdbc:mysql://localhost:3306/kidzee_login"; // Replace with your database name
+        final String DB_USER = "root"; // Replace with your database username
+        final String DB_PASSWORD = ""; // Replace with your database password
+        
+        String sql = "SELECT title FROM notices"; // Replace 'notice' with your column name and 'notices' with your table name
+    
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+    
+            while (rs.next()) {
+                notices.add(rs.getString("title")); // Replace 'notice' with your column name
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return notices;
+    }
+
+    private void showNoticesPopup(Component parent) {
+        // Fetch notices from the database
+        List<String> notices = fetchNoticesFromDatabase();
+        JPopupMenu popupMenu = new JPopupMenu();
+    
+        if (notices.isEmpty()) {
+            popupMenu.add(new JMenuItem("No new notices"));
+        } else {
+            for (String notice : notices) {
+                JMenuItem menuItem = new JMenuItem(notice);
+                popupMenu.add(menuItem);
+            }
+        }
+    
+        // Get the current mouse location
+        Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
+        
+        // Convert the screen coordinates to component-relative coordinates
+        SwingUtilities.convertPointFromScreen(mouseLocation, parent);
+    
+        // Show the popup menu at the mouse location
+        popupMenu.show(parent, mouseLocation.x, mouseLocation.y);
+    }
+    
+    
+    
 
     private void openTimetableManagementFrame() {
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);

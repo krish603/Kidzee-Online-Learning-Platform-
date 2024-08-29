@@ -1,10 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class First_Interface extends JFrame {
     private JProgressBar progressBar;
@@ -61,12 +57,44 @@ public class First_Interface extends JFrame {
                 progressBar.setValue(value + 1);
             } else {
                 timer.stop();
-                showLoginPage();
+                showSelectionPage(); // Show selection page after loading completes
             }
         });
     }
 
-    private void showLoginPage() {
+    private void showSelectionPage() {
+        ImageIcon icon = new ImageIcon("img/OptionPageBG.png");
+        Image backgroundImage = icon.getImage();
+
+        JPanel selectionPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // Draw the background image
+                g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        selectionPanel.setLayout(null);
+        
+        // Add "User" button
+        JButton userButton = new JButton(new ImageIcon("img/buttons/UserButton.png"));
+        userButton.setBounds(142, 462, 200, 75);
+        userButton.addActionListener(e -> showUserLoginPage());
+        selectionPanel.add(userButton);
+
+        // Add "Admin" button
+        JButton adminButton = new JButton(new ImageIcon("img/buttons/AdminButton.png"));
+        adminButton.setBounds(682, 462, 200, 75);
+        adminButton.addActionListener(e -> showAdminLoginPage());
+        selectionPanel.add(adminButton);
+
+        // Set the selection panel as the content pane of the frame
+        setContentPane(selectionPanel);
+        revalidate();
+        repaint();
+    }
+
+    private void showAdminLoginPage() {
         // Load the login page image
         ImageIcon icon = new ImageIcon("img/Login_page_bg.png");
         Image loginBackgroundImage = icon.getImage();
@@ -82,12 +110,17 @@ public class First_Interface extends JFrame {
         };
         loginPanel.setLayout(null); // Use absolute positioning
 
-        // Add components to the login panel
+        JButton goBackButton = new JButton(new ImageIcon("img/buttons/arrow.png")); // Replace with the actual path
+        goBackButton.setBounds(30, 20, 50, 50); // Adjust as needed
+        goBackButton.addActionListener(e -> showSelectionPage());
+        loginPanel.add(goBackButton);
+
+        // Add components to the login panel (same as before)
         JLabel userIcon = new JLabel(new ImageIcon("img/krish.png"));
         userIcon.setBounds(475, 100, 100, 100); // Example positioning, adjust as needed
         loginPanel.add(userIcon);
 
-        JLabel loginLabel = new JLabel("Welcome to the Login Panel!");
+        JLabel loginLabel = new JLabel("Welcome to the Admin Login Panel!");
         loginLabel.setFont(new Font("Serif", Font.PLAIN, 22));
         loginLabel.setBounds(420, 206, 500, 30); // Position above the loading line
         loginPanel.add(loginLabel);
@@ -105,9 +138,8 @@ public class First_Interface extends JFrame {
         loginButton.addActionListener(e -> {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
-            boolean authenticated = UserAuthenticator.authenticate(username, password);
+            boolean authenticated = AdminAuthenticator.authenticate(username, password);
             if (authenticated) {
-                // Pass this instance (the frame) to the DashboardPanel
                 DashboardPanel dashboardPanel = new DashboardPanel(mainFrame);
                 setContentPane(dashboardPanel);
                 revalidate();
@@ -118,46 +150,79 @@ public class First_Interface extends JFrame {
         });
         loginPanel.add(loginButton);
 
-        // Set the custom panel as the content pane of the frame
         setContentPane(loginPanel);
         revalidate();
     }
 
-    class DatabaseConnection {
-        private static final String URL = "jdbc:mysql://localhost:3306/kidzee_login";
-        private static final String USER = "root";
-        private static final String PASSWORD = "";
+    private void showUserLoginPage() {
+        // Load the login page image
+        ImageIcon icon = new ImageIcon("img/Login_page_bg.png");
+        Image loginBackgroundImage = icon.getImage();
 
-        static {
-            try {
-                Class.forName("com.mysql.cj.jdbc.Driver");
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }   
-        }
-
-        public static Connection getConnection() throws SQLException {
-            return DriverManager.getConnection(URL, USER, PASSWORD);
-        }
-    }
-
-    class UserAuthenticator {
-        public static boolean authenticate(String username, String password) {
-            String query = "SELECT * FROM login_details WHERE username = ? AND password = ?";
-            try (Connection connection = DatabaseConnection.getConnection();
-                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                preparedStatement.setString(1, username);
-                preparedStatement.setString(2, password);
-                ResultSet resultSet = preparedStatement.executeQuery();
-                return resultSet.next();
-            } catch (SQLException e) {
-                e.printStackTrace();
+        // Create a custom JPanel to draw the login background image
+        JPanel userLoginPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // Draw the login background image
+                g.drawImage(loginBackgroundImage, 0, 0, getWidth(), getHeight(), this);
             }
-            return false;
-        }
+        };
+        userLoginPanel.setLayout(null); // Use absolute positioning
+
+        JButton goBackButton = new JButton(new ImageIcon("img/buttons/arrow.png")); // Replace with the actual path
+        goBackButton.setBounds(30, 20, 50, 50); // Adjust as needed
+        goBackButton.addActionListener(e -> showSelectionPage());
+        userLoginPanel.add(goBackButton);
+        
+        JLabel userIcon = new JLabel(new ImageIcon("img/krish.png"));
+        userIcon.setBounds(475, 100, 100, 100); // Example positioning, adjust as needed
+        userLoginPanel.add(userIcon);
+
+        JLabel userLoginLabel = new JLabel("Welcome to the User Login Panel!");
+        userLoginLabel.setFont(new Font("Serif", Font.PLAIN, 22));
+        userLoginLabel.setBounds(400, 206, 500, 30); 
+        userLoginPanel.add(userLoginLabel);
+        
+        PlaceholderTextField usernameField = new PlaceholderTextField("Username");
+        usernameField.setBounds(400, 250, 300, 30); 
+        userLoginPanel.add(usernameField);
+
+        PlaceholderPasswordField passwordField = new PlaceholderPasswordField("Password");
+        passwordField.setBounds(400, 300, 300, 30); 
+        userLoginPanel.add(passwordField);
+
+        JButton loginButton = new JButton(new ImageIcon("img/buttons/login.png"));
+        loginButton.setBounds(500, 350, 100, 50);
+        loginButton.addActionListener(e -> {
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+            boolean authenticated = UserAuthenticator.authenticate(username, password);
+            if (authenticated) {
+                // Implement User's Dashboard
+                JOptionPane.showMessageDialog(this, "User logged in successfully", "Login Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        userLoginPanel.add(loginButton);
+
+        setContentPane(userLoginPanel);
+        revalidate();
+        repaint();
     }
+
+    public void resetAndShowOptions() {
+        // Reset the progress bar
+        progressBar.setValue(0);
+        // Restart the loading process
+        timer.restart();
+    }
+    
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new First_Interface().setVisible(true));
     }
+
+    // Database connection and authenticator code remain unchanged...
 }
