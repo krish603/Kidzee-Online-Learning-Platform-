@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
 
+@SuppressWarnings("unused")
 public class First_Interface extends JFrame {
     private JProgressBar progressBar;
     private Timer timer;
