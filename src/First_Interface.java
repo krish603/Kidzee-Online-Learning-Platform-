@@ -211,18 +211,9 @@ public class First_Interface extends JFrame {
         revalidate();
         repaint();
     }
-
-    public void resetAndShowOptions() {
-        // Reset the progress bar
-        progressBar.setValue(0);
-        // Restart the loading process
-        timer.restart();
-    }
     
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new First_Interface().setVisible(true));
     }
-
-    // Database connection and authenticator code remain unchanged...
 }
