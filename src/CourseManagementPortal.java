@@ -11,7 +11,9 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Vector;
 
 public class CourseManagementPortal extends JFrame {
     private MainFrame mainFrame;
@@ -20,6 +22,7 @@ public class CourseManagementPortal extends JFrame {
     private JTextArea descriptionField;
     private JComboBox<String> isGpaComboBox, semesterComboBox;
     private JTable courseTable;
+    private Connection conn;
     private DefaultTableModel tableModel;
     private final String DB_URL = "jdbc:mysql://localhost:3306/kidzee_login"; // Replace with your database name
     private final String DB_USER = "root"; // Replace with your database username
@@ -36,6 +39,8 @@ public class CourseManagementPortal extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setLayout(null);
+
+        connectToDatabase();
 
         // Top Panel
         JPanel headerPanel = new JPanel();
@@ -182,10 +187,19 @@ public class CourseManagementPortal extends JFrame {
         // Table
         String[] columnNames = {"CourseID", "CourseName", "Credit", "isGPA", "Description", "Materials", "userID", "DepID", "LevelSem"};
         tableModel = new DefaultTableModel(columnNames, 0);
-        courseTable = new JTable(tableModel);
+        courseTable = new JTable(tableModel) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        courseTable.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
+        courseTable.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(new JCheckBox()));
         JScrollPane scrollPane = new JScrollPane(courseTable);
         scrollPane.setBounds(30, 340, 950, 250);
         getContentPane().add(scrollPane);
+
+        addSampleData();
 
         insertButton.addActionListener(e -> insertCourse());
         updateButton.addActionListener(e -> updateCourse());
@@ -201,6 +215,24 @@ public class CourseManagementPortal extends JFrame {
             depIdField.setText("");
             semesterComboBox.setSelectedIndex(0);
         });
+    }
+    
+    private void addSampleData() {
+        try {
+            String query = "SELECT * FROM courses";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Vector<String> row = new Vector<>();
+                for (int i = 1; i <= 11; i++) {
+                    row.add(rs.getString(i));
+                }
+                tableModel.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void insertCourse() {
@@ -299,6 +331,15 @@ public class CourseManagementPortal extends JFrame {
             
         } else {
             System.err.println("Error: MainFrame reference is null.");
+        }
+    }
+
+    private void connectToDatabase() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/kidzee_login", "root", ""); // Update with your DB credentials
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
