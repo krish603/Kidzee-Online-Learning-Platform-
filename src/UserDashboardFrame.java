@@ -5,6 +5,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class UserDashboardFrame extends JFrame {
 
     public UserDashboardFrame() {

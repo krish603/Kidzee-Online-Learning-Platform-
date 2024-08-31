@@ -18,6 +18,7 @@ public class UserCoursePage extends JFrame {
     private final String DB_USER = "root"; // Replace with your database username
     private final String DB_PASSWORD = "";
 
+    @SuppressWarnings("unused")
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
     }
