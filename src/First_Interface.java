@@ -200,8 +200,9 @@ public class First_Interface extends JFrame {
             String password = new String(passwordField.getPassword());
             boolean authenticated = UserAuthenticator.authenticate(username, password);
             if (authenticated) {
-                // Implement User's Dashboard
-                JOptionPane.showMessageDialog(this, "User logged in successfully", "Login Success", JOptionPane.INFORMATION_MESSAGE);
+                UserDashboardFrame dashboardFrame = new UserDashboardFrame();
+                dashboardFrame.setVisible(true);
+                dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
             }
