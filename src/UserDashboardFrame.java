@@ -101,12 +101,13 @@ class UserDashboardPanel extends JPanel {
     private void showNoticesPopup(Component parent) {
         // Fetch notices from the database
         List<String> notices = fetchNoticesFromDatabase();
+        List<String> notices1 = notices.reversed();
         JPopupMenu popupMenu = new JPopupMenu();
     
         if (notices.isEmpty()) {
             popupMenu.add(new JMenuItem("No new notices"));
         } else {
-            for (String notice : notices) {
+            for (String notice : notices1) {
                 JMenuItem menuItem = new JMenuItem(notice);
                 popupMenu.add(menuItem);
             }
